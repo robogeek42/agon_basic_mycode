@@ -5,7 +5,7 @@
 50 DIM REVLU%(64) : PROCloadLUT
 60 SW%=320:SH%=240
 70 RGBA=1
-80 NI%=8 : DIM F$(NI%),T$(NI%),W%(NI%),H%(NI%),ALPHA%(NI%)
+80 NI%=9 : DIM F$(NI%),T$(NI%),W%(NI%),H%(NI%),ALPHA%(NI%)
 90 FLINE%=NI%+2
 
 100 CLS : C.15: PRINT TAB(0,0);"Choose an Image:"; : C.2
@@ -18,14 +18,15 @@
 170 IF img < 1 OR img > NI% THEN GOTO 160
 180 GOTO 400
 
-200 DATA "Rialto Bridge","img/rialto.rgb2",320,213,0
-210 DATA "Pinata Assif","img/asshat.rgb2",197,231,0
-220 DATA "Gundam","img/gundam1.rgb2",228,240,0
-230 DATA "Cyberpunk Girl","img/girl2.rgb2",192,240,0
-240 DATA "Flower Girl","img/girl1.rgb2",240,240,0
-250 DATA "Parrot","img/parrot_small3.rgb2",188,240,0
-260 DATA "Geisha","img/girl3.rgb2",160,240,0
+200 DATA "Rialto Bridge","img/rialto.bgr2",320,213,0
+210 DATA "Pinata Assif","img/asshat.bgr2",197,231,0
+220 DATA "Gundam","img/gundam1.bgr2",228,240,0
+230 DATA "Cyberpunk Girl","img/girl2.bgr2",192,240,0
+240 DATA "Flower Girl","img/girl1.bgr2",240,240,0
+250 DATA "Parrot","img/parrot_small3.bgr2",188,240,0
+260 DATA "Geisha","img/girl3.bgr2",160,240,0
 270 DATA "Osaka Palace","img/osaka.bgr2",320,240,0
+280 DATA "Purple Lorikeet","img/purple_lori.bgr2",320,240,0
 
 400 s%=3+ALPHA%(img)
 410 efs%=W%(img)*H%(img)
