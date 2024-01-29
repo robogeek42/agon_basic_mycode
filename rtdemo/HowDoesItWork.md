@@ -6,17 +6,18 @@ So a couple of weeks ago this gem appeared on the Agon Discord
 
 A very respectable demonstration of a Ray Tracing scene from "back-in-the-day" when we could only dream of our modern world with realistic 3d real-time rendered full colour gorgeousness that we are so used to now.
 
-This was a conversion to 37 lines of Agon BASIC of an original lost to time.
+This was a conversion to 37 lines of Agon BASIC by Christian Pinder (of Elite:TNK fame) of an original maybe lost to time. (Actually, it may be [this one](https://bbcmic.ro/#%7B%22v%22%3A1%2C%22program%22%3A%22MODE1%3AVDU5%3AB%3D0%5CnFORN%3D8TO247%3AFORM%3D0TO319%5CnX%3D0%3AY%3D-.1%3AZ%3D3%3AU%3D%28M-159.5%29%2F160%3AV%3D%28N-127.5%29%2F160%3AW%3D1%2FSQR%28U*U%2BV*V%2B1%29%3AU%3DU*W%3AV%3DV*W%3AI%3DSGNU%3AG%3D1%5CnE%3DX-I%3AF%3DY-I%3AP%3DU*E%2BV*F-W*Z%3AD%3DP*P-E*E-F*F-Z*Z%2B1%3AIFD%3E0T%3D-P-SQRD%3AIFT%3E0X%3DX%2BT*U%3AY%3DY%2BT*V%3AZ%3DZ-T*W%3AE%3DX-I%3AF%3DY-I%3AG%3DZ%3AP%3D2*%28U*E%2BV*F-W*G%29%3AU%3DU-P*E%3AV%3DV-P*F%3AW%3DW%2BP*G%3AI%3D-I%3AGOTO40%5CnIFV%3C0P%3D%28Y%2B2%29%2FV%3AV%3D-V*%28%28INT%28X-U*P%29%2BINT%28Z-W*P%29AND1%29%2F2%2B.3%29%2B.2%5CnB%3DB%2B3*SQRV%3AGCOL0%2C3-INTB%3AB%3DB-INTB%5CnPLOT69%2C4*M%2C4*N%3ANEXT%2C%22%7D) - in just 7 lines of BBC BASIC!) 
 
 It looked like this:
 ![RTDemo screenshot](AgonRTDemo.png "RTDemo screenshot")
 
-You can see a checkerboard floor receding into the horizon with a graduated sky overhead. Floating in mid air are two perfectly mirrored balls, impossibly reflecting the scene around them.  It uses **just 5 colours** but uses a dithering effect to give a sense of depth to the world.
+You can see a checkerboard floor receding into the horizon with a graduated sky overhead. Floating in mid air are two perfectly mirrored balls, impossibly reflecting the scene around them.  It uses **just 4 colours** but uses a dithering effect to give a sense of depth to the world.
 
 ## The CODE
 Sure, I hear you say - this is BASIC, how hard can it be to understand?  Well, it turns out, it is not so easy.  There is no "define sphere" function, no vertices or plane equation describing the floor, and certainly not a line of OpenGL in sight.
 
-But, fortunately for us, it is heavily commented. Here it is in it's full glory:
+But, fortunately for us, it is heavily commented by Christian as he teased apart it's inner workings. 
+Here it is in it's full glory:
 
 ```
    10 DIM A(16):A(0)=0:A(1)=24:A(2)=6:A(3)=30:A(4)=36:A(5)=12:A(6)=42:A(7)=18:A(8)=9:A(9)=33:A(10)=3:A(11)=27:A(12)=45:A(13)=21:A(14)=39:A(15)=15
@@ -58,7 +59,7 @@ But, fortunately for us, it is heavily commented. Here it is in it's full glory:
   340 =-V*((INT(X-U*P)+INT(Z-W*P)AND1)/2+.3)+.2:REM multiply simple gradient by checkerboard
 ```
 
-My intention in this article is to breakdown the code a little and explain what I think the various lines do.
+My intention in this article is to breakdown the code a little and explain what the various lines do, and so, how it works.
 
 Here goes!
 
@@ -178,23 +179,45 @@ Finally Line 130 calls a function with all the calculated values describing the 
 
 Lets take this bit by bit.
 
+First, you need to know the sphere equation:
+
+![Sphere Equation](SphereEquation.png)
+
+where `(h,k,l)` are the vector to the sphere centre from the origin, and `r` is the radius. Solving this quadratic is effectively what the next few lines do.
+(A link to more information on this method is below)
+
 ```
   200 E=X-I:F=Y-I:G=Z:REM vector from sphere centre to ray start
 ```
-Rember I is -1 or +1 depending on if we are on the left or right.  X and Y are the ray starting position (initially the camera position), so if we take or add 1 to X or Y we get a point in space to the left and below or to the right and above the camera.  This is where the spheres are placed.
+Remember I is -1 or +1 depending on if we are on the left or right.  X and Y are the ray starting position (initially the camera position), so if we take or add 1 to X or Y we get a point in space to the left and below or to the right and above the camera.  This is where the spheres are placed.
 
 ```
   210 P=U*E+V*F-W*G:REM dot product? Z seems to be flipped
-```
-A dot-product of the ray direction vector and the sphere centre position. 
-In vector maths the dot-product is a simple sum of the multiplication of components, but it has the effect of telling you the magnitude of one vector in the direction of another.
-This gives the magintude of the ray pointed towards the sphere. But the Z direction is flipped, as the commentator notes. The reason is because Z reduces going into the screen, and you want the sphere to be ahead of you, not behind.
-
-*Fun fact* : you can change the spheres size and distance from the camera here - but careful because it is easy to make the numbers too large for subsequent calculations.
-
-```
   220 D=P*P-E*E-F*F-G*G+1
 ```
-So, we have the magnitude of the amount of the ray pointed at a sphere, and a vector pointing to the sphere.  We xan use this to determine whether a ray hits a sphere or not.
-That is what D will denote here.  
+
+Line 210 calculates A dot-product of the ray direction vector and the sphere centre position. 
+In vector maths the dot-product is a simple sum of the multiplication of components, but it has the effect of telling you the magnitude of one vector in the direction of another.
+This gives the magintude of the ray pointed towards the sphere. But the Z direction is flipped, as Christian notes. The reason is because Z reduces going into the screen, and you want the sphere to be ahead of you, not behind.
+
+So, now we have `P` the magnitude of the amount of the ray pointed at a sphere, and a vector pointing to the sphere.  
+
+If you re-write the sphere equation in terms of this value you get 
+
+$$P^2 - R^2 = 0$$
+
+Which is a general quadratic equation.  The roots of this can be caluclated using a *discriminant*.  
+Line 220 calculates this.
+
+Note that the `1` in line 220 is the radius of the sphere (squared). You can change the radius of the sipheres here.
+
+The solutions to the equation are 
+
+* D is positive, in which case the ray intersects with the sphere, and if we wanted we could get the two roos (intersection points)
+* D is zero, the ray hits the sphere tangentially
+* D is negative, meaning that the ray doesn't intersect with the sphere
+
+The theory behind this is maths heavy, but it nicely outlined here: 
+[Notes on the mathematics of a ray intersecting a sphere](https://www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes/ray-sphere-intersection.html)
+
 
