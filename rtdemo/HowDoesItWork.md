@@ -200,7 +200,7 @@ Remember `I` is `-1` or `+1` depending on if we are on the left or right.  `X` a
 
 Now the sphere equation can be written as
 
-$$ (x-E)^2 + (y-(F)^2 + (z-G)^2 = 1^2 $$
+$$ (x-E)^2 + (y-F)^2 + (z-G)^2 = 1^2 $$
 
 The next part will solve this equation:
 
