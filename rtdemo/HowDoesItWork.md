@@ -450,4 +450,4 @@ Enjoy!  And Happy Agoning fellow Agoners!
 
 #### *Robogeekoid*
 
-![RoboGeek Comic #9 Hubris](/RG_9_Hubris.png)
+![RoboGeek Comic #9 Hubris](RG_9_Hubris.png)
