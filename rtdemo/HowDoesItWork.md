@@ -9,6 +9,7 @@ A very respectable demonstration of a Ray Tracing scene from "back-in-the-day" w
 This was a conversion to 37 lines of Agon BASIC by Christian Pinder (of Elite:TNK fame) of an original maybe lost to time. (Actually, it may be [this one](https://bbcmic.ro/#%7B%22v%22%3A1%2C%22program%22%3A%22MODE1%3AVDU5%3AB%3D0%5CnFORN%3D8TO247%3AFORM%3D0TO319%5CnX%3D0%3AY%3D-.1%3AZ%3D3%3AU%3D%28M-159.5%29%2F160%3AV%3D%28N-127.5%29%2F160%3AW%3D1%2FSQR%28U*U%2BV*V%2B1%29%3AU%3DU*W%3AV%3DV*W%3AI%3DSGNU%3AG%3D1%5CnE%3DX-I%3AF%3DY-I%3AP%3DU*E%2BV*F-W*Z%3AD%3DP*P-E*E-F*F-Z*Z%2B1%3AIFD%3E0T%3D-P-SQRD%3AIFT%3E0X%3DX%2BT*U%3AY%3DY%2BT*V%3AZ%3DZ-T*W%3AE%3DX-I%3AF%3DY-I%3AG%3DZ%3AP%3D2*%28U*E%2BV*F-W*G%29%3AU%3DU-P*E%3AV%3DV-P*F%3AW%3DW%2BP*G%3AI%3D-I%3AGOTO40%5CnIFV%3C0P%3D%28Y%2B2%29%2FV%3AV%3D-V*%28%28INT%28X-U*P%29%2BINT%28Z-W*P%29AND1%29%2F2%2B.3%29%2B.2%5CnB%3DB%2B3*SQRV%3AGCOL0%2C3-INTB%3AB%3DB-INTB%5CnPLOT69%2C4*M%2C4*N%3ANEXT%2C%22%7D) - in just 7 lines of BBC BASIC!) 
 
 It looked like this:
+
 ![RTDemo screenshot](AgonRTDemo.png "RTDemo screenshot")
 
 You can see a checkerboard floor receding into the horizon with a graduated sky overhead. Floating in mid air are two perfectly mirrored balls, impossibly reflecting the scene around them.  It uses **just 4 colours** but uses a dithering effect to give a sense of depth to the world.
@@ -61,7 +62,7 @@ Here it is in it's full glory:
 
 My intention in this article is to breakdown the code a little and explain what the various lines do, and so, how it works.
 
-Here goes!
+***Here goes!***
 
 ## Part 1 Ray Tracing : *Who is this Ray chap anyway?*
 First you need to know a little about what we are trying to achieve here.  This code is rendering a 3D scene using a technique called "Ray Tracing".
@@ -465,5 +466,9 @@ Hacker news: https://news.ycombinator.com/item?id=39023056
 Maths behind ray-tracing a sphere : https://www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes/ray-sphere-intersection.html
 
 Agon Discord users JohnGay and ACKRobert for inspiration leading to me writing this
+
+My good friend Kirk Valladares for the RoboGeek comic. http://metricspace.co.uk/robogeek2/
+
+Screenshots were taken using thr FAB-Agon-Emulator by Tom Morton : https://github.com/tomm/fab-agon-emulator
 
 
