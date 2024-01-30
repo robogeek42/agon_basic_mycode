@@ -449,7 +449,7 @@ Here is a render using 16 colours at 640x480 pixels.
 
 I have made some modifications to the code to allow this effect, and it is included in this repository as rtcolour.bas.
 
-![RTDemo 460x480 16colour](AgonRTDemo640x480_16col.png "RTDemo 460x480 16 colour")
+![RTDemo 460x480 16colour](AgonRTDemo640x480_16col2.png "RTDemo 460x480 16 colour")
 
 Enjoy!  And Happy Agoning fellow Agoners!
 
