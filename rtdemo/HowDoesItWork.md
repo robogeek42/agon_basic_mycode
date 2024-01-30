@@ -209,7 +209,7 @@ The next part will solve this equation:
 
 Line 210 calculates A dot-product of the ray direction vector and the sphere centre position. 
 In vector maths the dot-product is a simple sum of the multiplication of components, but it has the effect of telling you the magnitude of one vector in the direction of another.
-This gives the magintude of the ray pointed towards the sphere. But the Z direction is flipped, as Christian notes. The reason is because Z reduces going into the screen, and you want the sphere to be ahead of you, not behind.
+This gives the magnitude of the ray pointed towards the sphere. But the Z direction is flipped, as Christian notes. The reason is because Z reduces going into the screen, and you want the sphere to be ahead of you, not behind.
 
 So, now we have `P` the magnitude of the amount of the ray pointed at a sphere, and a vector pointing to the sphere.  
 
@@ -217,10 +217,10 @@ If you re-write the sphere equation in terms of this value you get
 
 $$P^2 - R^2 = 0$$
 
-Which is a general quadratic equation.  The roots of this can be caluclated using a ***discriminant***.  
+Which is a general quadratic equation.  The roots of this can be calculated using a ***discriminant***.  
 Line 220 calculates this.
 
-Note that the `1` in line 220 is the radius of the sphere (squared). You can change the radius of the sipheres here.
+Note that the `1` in line 220 is the radius of the sphere (squared). You can change the radius of the spheres here.
 
 The solutions to the equation are 
 
@@ -265,7 +265,8 @@ So if T is negative we can ignore that ray intersection
 
 If we reach line 250 we know that the ray has hit a sphere, so lets bounce the ray and see if it hits something else.  This second ray is why you can see the reflection of one sphere on the other.
 
-First get a new vector that has its origin at the centre of the sphere. *I am not sure why we need this, we already have set E,F and G to these values at line 200.*
+First get a new vector that has its origin at the centre of the sphere. This is recalculated for the new ray `(X,Y,Z)`.
+
 ```BASIC
 260 E=X-I:F=Y-I:G=Z:REM vector from sphere centre to new ray start
 ```
@@ -276,7 +277,8 @@ Next we get the dot product we calculated before, to give us the direction vecto
 270 P=2*(U*E+V*F-W*G):REM dot product shenanigans?
 280 U=U-P*E:V=V-P*F:W=W+P*G:REM new ray direction vector
 ```
- I am not entirely sure why the magnitude has to be doubled, but my guess is that the new ray starts at the centre rather than the surface of the sphere ... 
+
+I am not entirely sure why the magnitude has to be doubled, but my guess is that the new ray starts at the centre rather than the surface of the sphere ... 
 
 Finally, we flip `I` and fire a new ray. 
  
@@ -329,7 +331,7 @@ Now the checkerboard: `(INT(X-U*P)+ INT(Z-W*P) AND 1`
 
 The `INT()` function returns the Floor of its argument - turning a float into an int.  
 
-The first uses the horizontal direction of the ray vector to give integers increasing horizintally away from the centre point like this:
+The first uses the horizontal direction of the ray vector to give integers increasing horizontally away from the centre point like this:
 
 ```
 -4, -3, -2, -1, 0, +1, +2, +3, +4
@@ -350,7 +352,7 @@ But why?
 
 First, if we didn't add 0.3 before the multiply by -V, all the black squares would be just black, so we must add something to give the black squares "colour".
 
-But the 0.2 is a bit puzzling.  The best explanation of this I have seen is that this gives a sort of fog where as you go further back towards the horizon (V nears 0) the checkerboard no longer dominates, but is drowned out by the 0.2.  The effect is a *fog* as the floor receeds.  Nice!
+But the 0.2 is a bit puzzling.  The best explanation of this I have seen is that this gives a sort of fog where as you go further back towards the horizon (V nears 0) the checkerboard no longer dominates, but is drowned out by the 0.2.  The effect is a *fog* as the floor recedes.  Nice!
 
 Note that we will have two distinct colour ranges after this, [0.0-0.5] - these are the "black" squares, and [0.5-1.0] - these are the "white" squares.
 
@@ -373,11 +375,11 @@ Mode 10, as mentioned is a 320x240 pixel mode with 4 colours:
 
 ![FourCols.png](FourCols.png)
 
-The 3- flips around the colours to you will get white for lower values of C and Red for Higher. This has the effect of making the horizon brighter as it receeds.
+The 3- flips around the colours to you will get white for lower values of C and Red for Higher. This has the effect of making the horizon brighter as it recedes.
 
 Then you have a SQRT\(C\) expression.  This is so you get a gradual shortening of the changes in colour, with the foreground having least change in colour gradient.
 
-The multiply by 48 is interesting. It is chosen because a the end we will divide by 16 as part of the dithering effect, but we want to keep to 3 colours so 16*3=48 ensures that.
+The multiply by 48 is interesting. It is chosen because in the end we will divide by 16 as part of the dithering effect, but we want to keep to 3 colours so 16*3=48 ensures that.
 
 Without the next part that gives us 
 
@@ -401,20 +403,51 @@ The first line sets up a 4x4 matrix of values
 
 This creates a 16 lement array, which is intended to be used as a 4x4 matrix of numbers. Writen out as a matrix this looks like this:
 
-![Dither1.png](Dither1.png)
+![DitherTable.png](DitherTable.png)
 
 But it will be divided by 3 straight away, so you can consider the values as
 
 ![DitherDiv3.png](DitherDiv3.png)
 
-These values are added to each group of 4x4 pixels in the screen.  
+These values are added to the colour value of each pixel in the screen based on where they fall in the 4x4 grid.
 
-This code ` M MOD 4 + (N MOD 4) * 4 ` gives a differnt number acording to which pixel in a 4x4 group it is in. and that is used as an index into the `A()` array
+This code ` M MOD 4 + (N MOD 4) * 4 ` gives a differnt number acording to which pixel in a 4x4 group it is in, and that is used as an index into the `A()` array
 
-So, we have a dither value in range 0-15.
-
+---
 ```
  ( 48 * Sqrt(C) + Dither(0-15) ) DIV 16
 ```
 
-Effectively we end up with the colour value in the range 0-63, varying in a 4x4 pattern
+The calculation thus takes a Colour value in the range 0-3 (`48 * Sqrt(C)`), and adds a dither value in the range 0-1.
+The key is that as the colour value increases, more of the dither table spills over to the next colour.
+
+Still not clear? The following diagrams should help.  The value is the colour value and I highlight which of the dither table values spill over into the next colour.  And you can see a very nice pattern emerging.
+
+
+![Dither1.png](Dither1.png)
+
+![Dither2.png](Dither2.png)
+
+![Dither3.png](Dither3.png)
+
+![Dither4.png](Dither4.png)
+
+
+# End
+
+Of course, we are not restricted to 320x240 on the Agon, so here is a render done at 640x480 :
+
+![RTDemo 460x480 2colour](AgonRTDemo640x480_2col.png "RTDemo 460x480 2colour")
+
+And we are not restricted to 4 colours.
+Here is a render using 16 colours at 640x480 pixels.
+
+I have made some modifications to the code to allow this effect, and it is included in this repository as rtcolour.bas.
+
+![RTDemo 460x480 16colour](AgonRTDemo640x480_16col.png "RTDemo 460x480 16 colour")
+
+Enjoy!  And Happy Agoning fellow Agoners!
+
+#### *Robogeekoid*
+
+![RoboGeek Comic #9 Hubris](/RG_9_Hubris.png)
