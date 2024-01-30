@@ -455,3 +455,15 @@ Enjoy!  And Happy Agoning fellow Agoners!
 #### *Robogeekoid*
 
 ![RoboGeek Comic #9 Hubris](RG_9_Hubris.png)
+
+
+# Credits
+
+Hacker news: https://news.ycombinator.com/item?id=39023056 
+- some of the better explanations of the workings of this code is there. Particularly user Sharlin.
+
+Maths behind ray-tracing a sphere : https://www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes/ray-sphere-intersection.html
+
+Agon Discord users JohnGay and ACKRobert for inspiration leading to me writing this
+
+
