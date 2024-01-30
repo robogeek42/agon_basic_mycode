@@ -66,7 +66,7 @@ Here goes!
 ## Part 1 Ray Tracing : *Who is this Ray chap anyway?*
 First you need to know a little about what we are trying to achieve here.  This code is rendering a 3D scene using a technique called "Ray Tracing".
 
-Ray tracing is essentially paining each pixel in a scene using rays of light bouncing off objects to give each pixel its colour.
+Ray tracing is essentially painting each pixel in a scene using rays of light bouncing off objects to give each pixel its colour.
 Our eyes essentially work by taking in light (rays) from the surrounding world either directly from a light source or after they have hit one or many objects many many times. 
 
 Ray tracing takes this idea but simplifies it by going backwards.  That is, it fires out imaginary rays from our eye *in the direction of a pixel*, until it hits an object and then saying that the pixel should have the colour of the object it hits. The ray is of course welcome to bounce off the object and take the colour of a different object it hits - that way you see a reflection.
@@ -83,7 +83,7 @@ FOR EVERY PIXEL IN THE SCREEN
 NEXT PIXEL
 ```
 
-The Code listed above does thin in lines 60-170.  I will break this down a little more as we go on. 
+The Code listed above does this in lines 60-170.  I will break this down a little more as we go on. 
 
 But first, lets talk about the setup and write some info about the lines in the code.
 
@@ -100,9 +100,11 @@ This should be fairly self explanatory, but I want to point our the following:
 * MODE 10 is a 4 colour mode with a resolution of 320x240 pixels.
 * The colours are 0=BLACK, 1=RED, 2=YELLOW, 3=WHITE. Very BBC like :D
 * VDU Commands also come from BBC BASIC and are used to send commands to the display and sound processors - In this case, the ESP32 that is the video/sound coprocessor in the Agon machines.
-* Logical screen scaling is also a BBC thing.  Sophie Wilson's lovely BBC BASIC made sure us programmers would never have to worry about how many pixels any given mode had, and instead let us draw to a 1280x1024 imaginary screen and let the BBC take care of the scrolling.  This code turns this off here though as itis going to be easier for us to draw pixel by pixel.
-* You will not that the Camera Position variables have no suffix ("%" or "$") so in BBC BASIC they can be any kind of decimal number.  
-* X being 0 means that the camera is positioned centrally horizontally. Y, our position in the vertical, is negative, which means we are looking slightly upwards.  Z represents depth in the scene, and is positive. This is just convention, and you will note in later parts of the code that Z appears reversed. This is why.
+* Logical screen scaling is also a BBC thing.  Sophie Wilson's lovely BBC BASIC made sure us programmers would never have to worry about how many pixels any given mode had, and instead let us draw to a 1280x1024 imaginary screen and let the BBC take care of the scaling.  This code turns this off here though as it's going to be easier for us to draw pixel by pixel.
+* You will note that the Camera Position variables have no suffix ("%" or "$") so in BBC BASIC they can be any kind of decimal number.  
+* X being 0 means that the camera is positioned centrally horizontally. Y, our position in the vertical, is negative, which means we are looking slightly upwards.  Z represents depth in the scene, and is positive. This is just convention\*, and you will note in later parts of the code that Z appears reversed. This is why.
+
+\* *Convention is Z positive into the screen because of the Right-Hand-Rule.  Hold out three fingers of your right hand: Thumb is X, index finger is Y and 2nd finger is Z. Now move your hand so the thumb is pointing right and the index finger upwards.  The direction of the 2nd finger is positive Z.*
 
 ```BASIC
    60 FOR N=8 TO 238:REM iterate over screen pixel rows
@@ -136,20 +138,21 @@ Given my earlier ramblings, this should be fairly easy to follow :)
 Remember, we are firing a Ray from the camera (situated more or less in the middle of the scene set 3 units back) towards each and every pixel in the scene we are about to render.
 
 So lines 80 and 90 calculate the position of the pixel relative to the centre of the screen, and then turn that into a vector by dividing by the maximum distance to give a value from 0-1.
-Note here that both X and Y are divided by the same 160, even though the screen is only 240 pixels high - shouldn't that be 120 for Y?  No, if we did that we would add a distortion, so choose 160 to keep everything "square".
-Try it, change line 90 to "V=(N-127.5)/120". You get squashed balls ...
+
+Note here that both X and Y are divided by the same 160, even though the screen is only 240 pixels high - shouldn't that be 120 for Y?  Well, no, if we did that we would add a distortion, so choose 160 to keep everything "square".
+
+Try it, change line 90 to `"V=(N-127.5)/120"`. You get squashed balls ...
 
 ![RTDemo screenshot Squashed](AgonRTDemoSquashed.png "RTDemo screenshot Squashed")
 
 So that gives us the X and Y directions to fire the ray (stated as U and V), but we are in 3D so we also need the Z direction or depth - W.  The next line 100 calculates that using pythagoras. 
 It is inverted though as we will always be using this number in a division.
 
-But note the stray 1?  If that wasn't there you'd get division by zero and things would likely catch fire.
+But note the stray `1`?  If that wasn't there you'd get division by zero and things would likely catch fire.
 
 But the programmer isn't finished.  He knows that things are a little off, because we used a shortcut to working out the vector direction of the ray, it is currently still the distance from the centre of the screen in 2D.  To correct this, all you need to do is divide by the calculated Z direction of the ray - i.e. W.  Luckily, it is already a reciprocal so we can simply multiply. Nice.
 
-*Diagram needed here *
-
+---
 Next, we have this wonderful little line:
 ```BASIC
   120     I=SGNU:REM is ray facing left or right? I becomes x and y coordinates for sphere
@@ -157,9 +160,9 @@ Next, we have this wonderful little line:
 
 The BASIC function SGN(var) will return -1 if "var" is negative, +1 if it is positive, and 0 otherwise.
 
-But what does that mean for SGN(U)?  Well, U is the component of the ray direction in the X direction.  So it simply tells us if the pixel is in the left or right half of the screen.  This will be important in giving us the two balls later.
+But what does that mean for SGN(U)?  Well, U is the component of the ray in the X direction.  So it simply tells us if the pixel is in the left or right half of the screen.  This will be important in giving us the two balls later.
 
-Finally Line 130 calls a function with all the calculated values describing the ray's origin (X,Y,Z) and it's direction vector (U,V,W), along with that magical little I.
+Finally Line 130 calls a function with all the calculated values describing the ray's origin `(X,Y,Z)` and it's direction vector `(U,V,W)`, along with that magical little `I`.
 
 ## Part 4 : The RAY function : *This is balls.*
 
@@ -181,7 +184,7 @@ Finally Line 130 calls a function with all the calculated values describing the 
 Lets take this bit by bit.
 
 ### The Spheres
-First, there is an equation that describes the surface of a sphere.
+First, you may recall from school maths that there is an equation that describes the surface of a sphere.
 
 ![Sphere Equation](SphereEquation.png)
 
@@ -192,7 +195,7 @@ where `(h,k,l)` are the vector to the sphere centre from the origin, and `r` is 
 ```BASIC
   200 E=X-I:F=Y-I:G=Z:REM vector from sphere centre to ray start
 ```
-Remember I is -1 or +1 depending on if we are on the left or right.  X and Y are the ray starting position (initially the camera position), so if we take or add 1 to X or Y we get a point in space to the left and below or to the right and above the camera.  This is where the spheres are placed.
+Remember `I` is `-1` or `+1` depending on if we are on the left or right.  `X` and `Y` are the ray starting position (initially the camera position), so if we take or add 1 to X or Y we get a point in space to the left and below or to the right and above the camera.  This is where the spheres are placed.
 
 Now the sphere equation can be written as
 
@@ -211,13 +214,14 @@ Line 210 calculates A dot-product of the ray direction vector and the sphere cen
 In vector maths the dot-product is a simple sum of the multiplication of components, but it has the effect of telling you the magnitude of one vector in the direction of another.
 This gives the magnitude of the ray pointed towards the sphere. But the Z direction is flipped, as Christian notes. The reason is because Z reduces going into the screen, and you want the sphere to be ahead of you, not behind.
 
-So, now we have `P` the magnitude of the amount of the ray pointed at a sphere, and a vector pointing to the sphere.  
+So, now we have `P` the magnitude of the amount of the ray pointed at the sphere centre.
 
 If you re-write the sphere equation in terms of this value you get 
 
 $$P^2 - R^2 = 0$$
 
 Which is a general quadratic equation.  The roots of this can be calculated using a ***discriminant***.  
+
 Line 220 calculates this.
 
 Note that the `1` in line 220 is the radius of the sphere (squared). You can change the radius of the spheres here.
@@ -237,17 +241,17 @@ The theory behind this is maths heavy, but it nicely outlined here:
   230 IF D<=0 THEN =FNc(X,Y,Z,U,V,W):REM didn't hit anything; return colour
 ```
 
-So, if D is negative, we missed the sphere entirely, so colour the pixel as either sky or floor.  More on that later
+So, if D is negative, we missed the sphere entirely, so colour the pixel as either sky or floor. This is calculated in `FNc()` the colour function.  More on that later
 
 ---
 
-The function of line 240 is to stop a second internal reflection from the otherside of the sphere.
+The purpose of line 240 is to stop a second internal reflection from the otherside of the sphere.
 
 ```BASIC
   240 T=-P-SQRD:IF T<=0 =FNc(X,Y,Z,U,V,W):REM still didn't hit anything; return colour
 ```
 
-If you comment out the IF part, you end up with this:
+If you comment out the IF part, you end up with this: (Note the two weird extra reflctions).
 
 ![RTDemo screenshot Internal reflection](AgonRTDemoInternalReflection.png "RTDemo screenshot Internal Reflection")
 
@@ -287,7 +291,7 @@ Finally, we flip `I` and fire a new ray.
 300 =FNray(X,Y,Z,U,V,W,I):REM return colour from new ray
 ```
 
-I am not clear as to 
+As I said, my understanding of this is not perfect, and I am not clear as to:
 
 1. why we shouldn't fire the new ray from the sphere it hit, and 
 
@@ -295,7 +299,7 @@ I am not clear as to
 
 *Note*: In BBC Basic a Function can return a value by using the `"="` syntax.
 
-So, we are done with the FNray function, but where is the checkerboard?  Well that is calculated as part of the colour processing.  On to that next ...
+So, we are done with the `FNray()` function, but where is the checkerboard?  Well that is calculated as part of the colour processing.  On to that next ...
 
 ## The Colour Function
 
@@ -354,11 +358,11 @@ First, if we didn't add 0.3 before the multiply by -V, all the black squares wou
 
 But the 0.2 is a bit puzzling.  The best explanation of this I have seen is that this gives a sort of fog where as you go further back towards the horizon (V nears 0) the checkerboard no longer dominates, but is drowned out by the 0.2.  The effect is a *fog* as the floor recedes.  Nice!
 
-Note that we will have two distinct colour ranges after this, [0.0-0.5] - these are the "black" squares, and [0.5-1.0] - these are the "white" squares.
+Note that we will have two distinct colour ranges after this; [0.0-0.5] - these are the "black" squares, and; [0.5-1.0] - these are the "white" squares.
 
 # Part 4: Colour *A Final Colour and some Dithering*
 
-So, we finally exit the `FNray` function and end up back in the main loop.
+So, we finally exit the `FNray()` function and end up back in the main loop.
 We have a value of between 0->1 that represents the colour of the scene.
 
 If you were to have 256 shades of grey, you could just apply that colour and you are done.  A beautiful grey-scale scene. (I should do this in SDL to show it - but I am so out of time!)
@@ -375,11 +379,11 @@ Mode 10, as mentioned is a 320x240 pixel mode with 4 colours:
 
 ![FourCols.png](FourCols.png)
 
-The 3- flips around the colours to you will get white for lower values of C and Red for Higher. This has the effect of making the horizon brighter as it recedes.
+The `3-` flips around the colours to you will get white for lower values of C and Red for Higher. This has the effect of making the horizon brighter as it recedes.
 
-Then you have a SQRT\(C\) expression.  This is so you get a gradual shortening of the changes in colour, with the foreground having least change in colour gradient.
+Then you have a `SQRT(C)` expression.  This is so you get a gradual shortening of the changes in colour, with the foreground having least change in colour gradient.
 
-The multiply by 48 is interesting. It is chosen because in the end we will divide by 16 as part of the dithering effect, but we want to keep to 3 colours so 16*3=48 ensures that.
+The multiply by 48 is interesting. It is chosen because in the end we will divide by 16 as part of the dithering effect, but we want to keep to 3 colours so 16\*3=48 ensures that.
 
 Without the next part that gives us 
 
@@ -393,7 +397,7 @@ This is simply the scene drawn without any dithering in just those four colours:
 
 So, lets add dithering!
 
-### Dither
+## Dither
 
 The first line sets up a 4x4 matrix of values
 
