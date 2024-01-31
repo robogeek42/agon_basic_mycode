@@ -13,7 +13,7 @@
   120     V=(N-239.5)/320:REM y component of ray vector
   130     W=1/SQR(U*U+V*V+1):REM z component of ray vector
   140     U=U*W:V=V*W:REM normalise x and y components
-  150     I=SGNU/1.5:REM is ray facing left or right? I becomes x and y coordinates for sphere
+  150     I=SGNU:REM is ray facing left or right? I becomes x and y coordinates for sphere
   160     C=FNray(X,Y,Z,U,V,W,I):REM fire ray from X,Y,Z along U,V,W
   170     GCOL0, FNgetCol(C,M,N) : REM straight colour fucntion without gradient
   180     PLOT69,M,477-N:REM plot pixel (4x multiplier due to resolution-independent graphics coordinates - 1280x1024)
@@ -24,7 +24,7 @@
   230 END
   240 :
   250 DEFFNray(X,Y,Z,U,V,W,I)
-  260 E=X-I*1.5:F=Y-I:G=Z:REM vector from sphere centre to ray start
+  260 E=X-I:F=Y-I:G=Z:REM vector from sphere centre to ray start
   270 P=U*E+V*F-W*G:REM dot product? Z seems to be flipped
   280 D=P*P-E*E-F*F-G*G+1
   290 IF D<=0 THEN =FNc2(X,Y,Z,U,V,W):REM didn't hit anything; return colour
